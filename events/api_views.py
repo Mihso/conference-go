@@ -1,5 +1,7 @@
 from django.http import JsonResponse
 
+from events.acls import get_photo, get_weather_data
+
 from .models import Conference, Location, State
 
 from common.json import ModelEncoder
@@ -11,7 +13,7 @@ from django.views.decorators.http import require_http_methods
 
 class LocationListEncoder(ModelEncoder):
     model = Location
-    properties = ["name"]
+    properties = ["name", "city"]
 
 
 class LocationDetailEncoder(ModelEncoder):
@@ -22,10 +24,11 @@ class LocationDetailEncoder(ModelEncoder):
         "room_count",
         "created",
         "updated",
+        "picture_url",
     ]
 
     def get_extra_data(self, o):
-        return {"state": o.state.abbreviation}
+        return {"state": o.state.abbreviation,}
 
 
 class ConferenceDetailEncoder(ModelEncoder):
@@ -82,8 +85,12 @@ def api_show_conference(request, pk):
 
     if request.method == "GET":
         conference = Conference.objects.get(id=pk)
+        weather = get_weather_data(
+            conference.location.city,
+            conference.location.state.abbreviation
+        )
         return JsonResponse(
-            conference, encoder=ConferenceDetailEncoder, safe=False
+            {"conference": conference, "weather": weather}, encoder=ConferenceDetailEncoder, safe=False
         )
     elif request.method == "DELETE":
         count, _ = Conference.objects.filter(id=pk).delete()
@@ -138,6 +145,10 @@ def api_list_locations(request):
         )
     else:
         content = json.loads(request.body)
+
+        photo = get_photo(content["city"], content["state"])
+        
+        content.update(picture_url = photo)
 
         try:
             state = State.objects.get(abbreviation=content["state"])

@@ -2,6 +2,8 @@ from django.http import JsonResponse
 
 from .models import Presentation
 
+from events.models import Conference
+
 from common.json import ModelEncoder
 
 import json
@@ -58,7 +60,7 @@ def api_list_presentations(request, conference_id):
         )
     else:
         content = json.loads(request.body)
-        presentation = Presentation.create(conference = conference_id,**content)
+        presentation = Presentation.create(conference = Conference.objects.get(id = conference_id),**content)
         return JsonResponse(
             presentation,
             encoder= PresentationDetailEncoder,
