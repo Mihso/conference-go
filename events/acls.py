@@ -32,11 +32,11 @@ def get_photo(city, state):
 def get_weather_data(city, state):
     url2= 'http://api.openweathermap.org/geo/1.0/direct'
     params ={
-        "q" : f"{city}, {state}",
+        "q" : f"{city}, {state}, US",
         "limit" :  1,
         "appid" : OPEN_WEATHER_API_KEY
     }
-    r2 = requests.get(url2, params = params, headers=headers2)
+    r2 = requests.get(url2, params = params, headers = headers2)
     coord = json.loads(r2.content)
 
     try:
@@ -53,7 +53,7 @@ def get_weather_data(city, state):
     }
 
     url2 = 'http://api.openweathermap.org/data/2.5/weather'
-    response = requests.get(url2, params = params)
+    response = requests.get(url2, params = params, headers = headers2)
     cooord = json.loads(response.content)
 
     try:

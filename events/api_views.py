@@ -148,7 +148,7 @@ def api_list_locations(request):
 
         photo = get_photo(content["city"], content["state"])
         
-        content.update(picture_url = photo)
+        content.update(photo)
 
         try:
             state = State.objects.get(abbreviation=content["state"])
