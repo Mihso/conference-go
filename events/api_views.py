@@ -108,7 +108,7 @@ def api_show_conference(request, pk):
             )
         
         Conference.objects.filter(id=pk).update(**content)
-
+        
         conference = Conference.objects.get(id=pk)
         return JsonResponse(
             conference,
@@ -176,7 +176,7 @@ def api_show_location(request, pk):
     room count, created, updated, and state abbreviation.
 
     {
-        "name": location's name,
+        "name": location's loads()name,
         "city": location's city,
         "room_count": the number of rooms available,
         "created": the date/time when the record was created,
