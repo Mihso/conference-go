@@ -1,10 +1,14 @@
 from django.http import JsonResponse
 
-from .models import Attendee
+from .models import Attendee, ConferenceVO
 from common.json import ModelEncoder
 from django.views.decorators.http import require_http_methods
 import json
-from events.models import Conference
+
+
+class ConferenceVODetailEncoder(ModelEncoder):
+    model = ConferenceVO
+    properties = ["name", "import_href"]
 
 
 class AttendeeListEncoder(ModelEncoder):
@@ -26,7 +30,7 @@ class AttendeeDetailEncoder(ModelEncoder):
 
 
 @require_http_methods(["GET", "POST"])
-def api_list_attendees(request, conference_id):
+def api_list_attendees(request, conference_vo_id=None):
     """
     Lists the attendees names and the link to the attendee
     for the specified conference id.
@@ -47,7 +51,7 @@ def api_list_attendees(request, conference_id):
     }
     """
     if request.method == "GET":
-        attendees = Attendee.objects.filter(conference=conference_id)
+        attendees = Attendee.objects.filter(conference=conference_vo_id)
         return JsonResponse(
             {"attendees": attendees},
             encoder=AttendeeListEncoder,
@@ -56,9 +60,10 @@ def api_list_attendees(request, conference_id):
         content = json.loads(request.body)
 
         try:
-            conference = Conference.objects.get(id=conference_id)
+            conference_href = content["conference"]
+            conference = ConferenceVO.objects.get(import_href=conference_href)
             content["conference"] = conference
-        except Conference.DoesNotExist:
+        except ConferenceVO.DoesNotExist:
             return JsonResponse(
                 {"message": "Invalid conference id"},
                 status=400,
@@ -70,7 +75,8 @@ def api_list_attendees(request, conference_id):
             safe=False,
         )
 
-@require_http_methods(["DELETE","PUT", "GET"])
+
+@require_http_methods(["DELETE", "PUT", "GET"])
 def api_show_attendee(request, pk):
     """
     Returns the details for the Attendee model specified
@@ -93,7 +99,9 @@ def api_show_attendee(request, pk):
     """
     if request.method == "GET":
         attendee = Attendee.objects.get(id=pk)
-        return JsonResponse(attendee, encoder=AttendeeDetailEncoder, safe=False)
+        return JsonResponse(
+            attendee, encoder=AttendeeDetailEncoder, safe=False
+        )
     elif request.method == "DELETE":
         count, _ = Attendee.objects.filter(id=pk).delete()
         return JsonResponse({"deleted": count > 0})
@@ -101,9 +109,11 @@ def api_show_attendee(request, pk):
         content = json.loads(request.body)
         try:
             if "conference" in content:
-                conference = Conference.objects.get(name=content["conference"].get("name"))
+                conference = ConferenceVO.objects.get(
+                    name=content["conference"].get("name")
+                )
                 content["conference"] = conference
-        except Conference.DoesNotExist:
+        except ConferenceVO.DoesNotExist:
             return JsonResponse(
                 {"message": "Invalid conference"},
                 status=400,
@@ -113,6 +123,6 @@ def api_show_attendee(request, pk):
         attendee = Attendee.objects.get(id=pk)
         return JsonResponse(
             attendee,
-            encoder= AttendeeDetailEncoder,
+            encoder=AttendeeDetailEncoder,
             safe=False,
         )
