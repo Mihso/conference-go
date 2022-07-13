@@ -20,13 +20,16 @@ class AttendeeDetailEncoder(ModelEncoder):
     model = Attendee
     properties = ["email", "name", "company_name", "created"]
 
-    def get_extra_data(self, o):
-        return {
-            "conference": {
-                "name": o.conference.name,
-                "href": o.conference.get_api_url(),
-            }
-        }
+    encoders = {
+        "conference": ConferenceVODetailEncoder,
+    }
+    # def get_extra_data(self, o):
+    #     return {
+    #         "conference": {
+    #             "name": o.conference.name,
+    #             "href": o.conference.get_api_url(),
+    #         }
+    #     }
 
 
 @require_http_methods(["GET", "POST"])

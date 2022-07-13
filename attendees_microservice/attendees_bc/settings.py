@@ -43,6 +43,10 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
 ]
 
+CRONJOBS = [
+    ("* * * * *", "attendees.poll.get_conferences"),
+]
+
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -52,7 +56,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = "attendee_bc.urls"
+ROOT_URLCONF = "attendees_bc.urls"
 
 TEMPLATES = [
     {
@@ -70,7 +74,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "attendee_bc.wsgi.application"
+WSGI_APPLICATION = "attendees_bc.wsgi.application"
 
 
 # Database
@@ -124,7 +128,3 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-
-CRONJOBS = [
-    ("* * * * *", "attendees.poll.get_conferences"),
-]
