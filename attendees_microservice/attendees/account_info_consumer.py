@@ -27,8 +27,12 @@ def updateAccountVO(ch, method, properties, body):
     if is_active:
         AccountVO.objects.update_or_create(
             email=email,
-            is_active = is_active,
-            defaults = {"first_name":first_name, "last_name": last_name, "updated" : updated}
+            defaults={
+                "first_name": first_name,
+                "last_name": last_name,
+                "updated": updated,
+                "is_active": is_active,
+            },
         )
     else:
         try:
@@ -41,8 +45,9 @@ def updateAccountVO(ch, method, properties, body):
 #   https://github.com/rabbitmq/rabbitmq-tutorials/blob/master/python/receive_logs.py
 while True:
     try:
+        parameters = pika.ConnectionParameters(host="rabbitmq")
         connection = pika.BlockingConnection(
-            pika.ConnectionParameters(host="rabbitmq")
+            parameters  # pika.ConnectionParameters(host="rabbitmq")
         )
         channel = connection.channel()
 
@@ -54,7 +59,7 @@ while True:
         queue_name = result.method.queue
 
         channel.queue_bind(exchange="account_info", queue=queue_name)
-
+        print("hello")
         channel.basic_consume(
             queue=queue_name,
             on_message_callback=updateAccountVO,
@@ -64,7 +69,7 @@ while True:
         channel.start_consuming()
     except AMQPConnectionError:
         print("Can not connect to RabbitMQ")
-        time.sleep(2)
+        time.sleep(2.0)
 # infinite loop
 #   try
 #       create the pika connection parameters

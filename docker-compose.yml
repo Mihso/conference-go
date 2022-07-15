@@ -24,6 +24,8 @@ services:
       dockerfile: ./Dockerfile.account_info.dev
     volumes:
       - ./attendees_microservice:/app
+    depends_on:
+      - rabbitmq
   presentation_workflow:
     build:
       context: ./presentation_workflow
